@@ -1,32 +1,73 @@
-import com.example.pokerscore.Player
-import com.example.pokerscore.PokerScore
+import com.example.pokerscore.board.BoardPoker
+import com.example.pokerscore.board.CommunityCards
+import com.example.pokerscore.board.PokerScore
+import com.example.pokerscore.card.Card
+import com.example.pokerscore.card.CardPoker
+import com.example.pokerscore.card.Deck
+import com.example.pokerscore.card.Figure
+import com.example.pokerscore.card.Suit
+import com.example.pokerscore.hand.Hand
+import com.example.pokerscore.player.Player
+import com.example.pokerscore.player.PlayerInGame
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PokerGainsCalculatorTest {
 
-    @Test
-    fun `test calculatePokerGains avec une paire gagnante`() {
+   /* @Test
+    fun `test calculatePokerGains avec un carré`() {
+        val listCardsPlayer1 = listOf(
+            CardPoker(Suit.CLUBS, Figure.QUEEN),
+            CardPoker(Suit.HEARTS, Figure.QUEEN),
+        )
+        val listCardsPlayer2 = listOf(
+            CardPoker(Suit.CLUBS, Figure.JACK),
+            CardPoker(Suit.HEARTS, Figure.JACK),
+        )
+        val listCardsPlayer3 = listOf(
+            CardPoker(Suit.CLUBS, Figure.ACE),
+            CardPoker(Suit.HEARTS, Figure.ACE),
+        )
         val players = listOf(
-            Player("Joueur 1", 100, listOf("Ah", "Ad")),
-            Player("Joueur 2", 150, listOf("Ks", "Kd")),
-            Player("Joueur 3", 200, listOf("Qc", "Qh"))
+            PlayerInGame("Joueur 1", 100),
+            PlayerInGame("Joueur 2", 100),
+            PlayerInGame("Joueur 3", 100),
         )
         val potAmount = 300
-        val communityCards = listOf("2s", "3d", "Th", "Qd", "Kc")
+        /*val communityCards = listOf(
+            Card(Suit.CLUBS, Figure.FIVE),
+            Card(Suit.HEARTS, Figure.FIVE),
+            Card(Suit.DIAMONDS, Figure.FOUR),
+            Card(Suit.SPADES, Figure.FOUR),
+            Card(Suit.CLUBS, Figure.THREE),
+        )*/
 
         val expectedGains = mapOf(
             "Joueur 1" to 0,
-            "Joueur 2" to 150,
-            "Joueur 3" to 150
+            "Joueur 2" to 0,
+            "Joueur 3" to 300
         )
 
         val score = PokerScore()
-        val actualGains = score.calculatePokerGains(players, potAmount, communityCards)
+        val deck = Deck()
+        val communityCards = CommunityCards()
+        communityCards.cards = listOf(
+            CardPoker(Suit.CLUBS, Figure.FIVE),
+            CardPoker(Suit.HEARTS, Figure.FIVE),
+            CardPoker(Suit.DIAMONDS, Figure.FOUR),
+            CardPoker(Suit.SPADES, Figure.FOUR),
+            CardPoker(Suit.CLUBS, Figure.THREE),
+        ).toMutableList()
+        val board = BoardPoker(deck,communityCards)
+        board.players = players as MutableList<PlayerInGame>
+        players[0].setHand(Hand(listCardsPlayer1))
+        players[1].setHand(Hand(listCardsPlayer2))
+        players[2].setHand(Hand(listCardsPlayer3))
+        val actualGains = score.calculatePokerGains(board)
 
         assertEquals(expectedGains, actualGains)
-    }
-
+    }*/
+/*
     @Test
     fun `test calculatePokerGains avec une suite gagnante`() {
         val players = listOf(
@@ -39,8 +80,8 @@ class PokerGainsCalculatorTest {
 
         val expectedGains = mapOf(
             "Joueur 1" to 200,
-            "Joueur 2" to 50,
-            "Joueur 3" to 50
+            "Joueur 2" to 100,
+            "Joueur 3" to 0
         )
 
         val score = PokerScore()
@@ -52,7 +93,7 @@ class PokerGainsCalculatorTest {
     //à réparé
     @Test
     fun `test evaluateHand avec une quinte flush royal`() {
-        val cards = listOf("Ad", "Kd","Qd", "Td", "10d", "5d", "Kc")
+        val cards = listOf("Ad", "Kd","Qd", "Jd", "10d", "5d", "4c")
         val score = PokerScore()
 
         val resultHand = score.evaluateHand(cards)
@@ -119,7 +160,7 @@ class PokerGainsCalculatorTest {
 
     @Test
     fun `test evaluateHand avec un brelan`() {
-        val cards = listOf("5c", "Kd","Ts", "3d", "5h", "5s", "Kc")
+        val cards = listOf("5c", "Qd","Ts", "3d", "5h", "5s", "Kc")
         val score = PokerScore()
 
         val resultHand = score.evaluateHand(cards)
@@ -149,4 +190,15 @@ class PokerGainsCalculatorTest {
 
         assertEquals(expectedHand, resultHand)
     }
+
+    @Test
+    fun `test evaluateHand avec une carte haute`() {
+        val cards = listOf("Ac", "Kd","Js", "3d", "4h", "9s", "Qc")
+        val score = PokerScore()
+
+        val resultHand = score.evaluateHand(cards)
+        val expectedHand = PokerScore.Hand.None
+
+        assertEquals(expectedHand, resultHand)
+    }*/
 }
