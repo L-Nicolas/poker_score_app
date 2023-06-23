@@ -8,11 +8,14 @@ class App {
     fun main() {
         val playersName = listOf("Player 1","Player 2","Player 3")
 
-        val chips = 1000
         val deck = Deck()
         val communityCards = CommunityCards()
-        val board = BoardPoker(deck,communityCards)
-        val party = Party(board, chips)
+        val boardPoker = BoardPoker.builder(deck, communityCards)
+            .withSmallBlind(10)
+            .withBigBlind(20)
+            .build()
+
+        val party = PartyPoker(boardPoker)
 
         playersName.forEach { party.join(it) }
         party.start()

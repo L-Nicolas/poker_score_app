@@ -28,7 +28,11 @@ fun HomeScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "PokerScore")
+        Text(
+            text = "PokerScore",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.height(64.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

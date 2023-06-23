@@ -8,28 +8,43 @@ import com.example.pokerscore.player.PlayerInGame
 import com.example.pokerscore.player.PlayerState
 import com.example.pokerscore.player.RoleOnBoard
 
-class BoardPoker : InterfaceBoard {
-    private val MIN_PLAYER_COUNT = 2
-    private val MAX_PLAYER_COUNT = 6
+class BoardPoker private constructor(val deck: Deck, val communityCards: CommunityCards) : InterfaceBoard {
+    val MIN_PLAYER_COUNT = 2
+    val MAX_PLAYER_COUNT = 6
+    override val players: MutableList<PlayerInGame> = mutableListOf()
 
-    val smallBlind: Int = 10
-    val bigBlind: Int = 20
-    val deck: Deck
-    val communityCards: CommunityCards
-    val players: MutableList<PlayerInGame> = mutableListOf()
-    val actionPlayers: MutableList<ActionPlayer> = mutableListOf()
+    var smallBlind: Int = 10
+    var bigBlind: Int = 20
     val score: PokerScore = PokerScore()
 
     private val trashCards = mutableListOf<Card>()
-    private val defaultAmountChipPlayer: Int = 1000
 
     var pot: Int = 0
     private var currentIndexPlayer: Int = 0
-    private var turnState: BoardState = FirstState(this)
+    private var turnState: BoardState = InitialState(this)
 
-    constructor(deck: Deck, communityCards: CommunityCards) {
-        this.deck = deck
-        this.communityCards = communityCards
+    class Builder(private val deck: Deck, private val communityCards: CommunityCards) {
+        private val boardPoker: BoardPoker = BoardPoker(deck, communityCards)
+
+        fun withSmallBlind(smallBlind: Int): Builder {
+            boardPoker.smallBlind = smallBlind
+            return this
+        }
+
+        fun withBigBlind(bigBlind: Int): Builder {
+            boardPoker.bigBlind = bigBlind
+            return this
+        }
+
+        fun build(): BoardPoker {
+            return boardPoker
+        }
+    }
+
+    companion object {
+        fun builder(deck: Deck, communityCards: CommunityCards): Builder {
+            return Builder(deck, communityCards)
+        }
     }
 
     override fun start() {
@@ -37,10 +52,28 @@ class BoardPoker : InterfaceBoard {
             throw IllegalStateException("Le nombre de joueurs doit être supérieur ou égal à $MIN_PLAYER_COUNT.")
         }
         loopGame()
+        end()
     }
 
     override fun end() {
         // TODO
+        println("Fin de la partie")
+    }
+
+    private fun loopGame() {
+        while(conditionToContinueGame()){
+            loopBoard()
+            println("conditionToContinueGame : ${conditionToContinueGame()}")
+        }
+        //vérifier
+        turnState = EndState(this)
+    }
+
+    private fun loopBoard() {
+        while (conditionToContinueTurnBoard()) {
+            turnState.action()
+            println("conditionToContinueTurnBoard : ${conditionToContinueTurnBoard()}")
+        }
     }
 
     override fun addPlayer(player: PlayerInGame) {
@@ -54,9 +87,9 @@ class BoardPoker : InterfaceBoard {
         deck.reset()
         players.map { player ->
             player.clearHand()
+            player.setState(PlayerState.NONE)
         }
         communityCards.clear()
-        //roleOnBoard.clear()
         trashCards.clear()
         resetPotAmount()
     }
@@ -100,6 +133,15 @@ class BoardPoker : InterfaceBoard {
         printPotAmount()
         printPlayers()
         turnState.printState()
+    }
+    fun findFirstPlayer(): PlayerInGame {
+        val bigBlindIndex = players.indexOfFirst { it.getRoleOnBoard() == RoleOnBoard.BIG_BLIND }
+        val nextPlayerIndex = (bigBlindIndex + 1) % players.size
+        val nextPlayer = players[nextPlayerIndex]
+        if (nextPlayer != null) {
+            setCurrentPlayer(nextPlayer)
+        }
+        return nextPlayer
     }
 
     fun setCurrentPlayer(player: PlayerInGame) {
@@ -146,12 +188,6 @@ class BoardPoker : InterfaceBoard {
         pot = 0
     }
 
-    private fun loopGame() {
-        while (conditionToContinueTurnBoard()) {
-            turnState.action()
-        }
-    }
-
     fun turnLoop() {
         while (conditionToContinueTurnPlayer()) {
             printBoard()
@@ -174,9 +210,14 @@ class BoardPoker : InterfaceBoard {
             }
             changeCurrentPlayer()
         }
+        fillPot()
     }
 
-    fun isLastPlayerOfTurn(): Boolean {
+    private fun isLastPlayerOfTurn(): Boolean {
+        return players.filter { player -> player.getState() != PlayerState.FOLD }.size == 1
+    }
+
+    private fun isLastPlayerOnBoard(): Boolean {
         return players.filter { player -> player.getState() != PlayerState.FOLD }.size == 1
     }
 
@@ -184,16 +225,21 @@ class BoardPoker : InterfaceBoard {
         return players.filter { player -> player.getState() != PlayerState.FOLD }
     }
 
+    fun getPlayerThatCanTalk(): List<PlayerInGame> {
+        return players.filter { player -> player.getState() != PlayerState.FOLD && player.getState() != PlayerState.ALL_IN }
+    }
+
     fun revealCards() {
         getPlayerInGame().map { player -> player.getHand()?.revealCards() }
     }
 
     fun resetStatePlayer() {
-        players.filter { player -> player.getState() != PlayerState.FOLD && player.getState() != PlayerState.ALL_IN }.map { player -> player.setState(PlayerState.NONE) }
+        getPlayerThatCanTalk().map { player -> player.setState(PlayerState.NONE) }
+        allPlayerHaveToTalk()
     }
 
     fun allPlayerHaveToTalk() {
-        getPlayerInGame().map { player -> player.setHaveToTalk(true) }
+        getPlayerThatCanTalk().map { player -> player.setHaveToTalk(true) }
     }
 
     private fun determineStateHandCurrentPlayer() {
@@ -238,6 +284,7 @@ class BoardPoker : InterfaceBoard {
         val currentPlayer = getCurrentPlayer()
         val statePlayer = currentPlayer.getState()
         val stateHand = currentPlayer.getStateHand()
+
         println("State player : $statePlayer")
 
         if(statePlayer == PlayerState.ALL_IN || statePlayer == PlayerState.FOLD) {
@@ -269,6 +316,10 @@ class BoardPoker : InterfaceBoard {
             }
         }
         return actions
+    }
+
+    private fun conditionToContinueGame(): Boolean {
+        return players.filter { player -> player.getChipCount() > 0 }.size > 1
     }
 
     private fun conditionToContinueTurnBoard(): Boolean {

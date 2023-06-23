@@ -13,7 +13,7 @@ interface PartyState {
 class UpcomingPartyState(override val party: Party) : PartyState {
     override fun start() {
         party.board.start()
-        party.setState(OngoingPartyState(party))
+        party.state = OngoingPartyState(party)
     }
 
     override fun end() {
@@ -21,7 +21,7 @@ class UpcomingPartyState(override val party: Party) : PartyState {
     }
 
     override fun join(name: String) {
-        party.board.addPlayer(PlayerInGame(name, party.entryChipCount))
+        party.board.addPlayer(PlayerInGame(name))
     }
 }
 

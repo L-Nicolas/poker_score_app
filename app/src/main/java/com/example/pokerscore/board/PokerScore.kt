@@ -10,7 +10,6 @@ class PokerScore {
     ) {
         val sortedPlayers = sortPlayerByHand(board.getPlayerInGame(), board.communityCards.cards)
         spreadPokerGains(board.getPotAmount(), sortedPlayers)
-        println("sortedPlayers : ")
         sortedPlayers.forEach(::println)
     }
 

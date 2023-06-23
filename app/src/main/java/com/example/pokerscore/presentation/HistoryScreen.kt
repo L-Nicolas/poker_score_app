@@ -15,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.pokerscore.domaine.repository.PlayerRepository
 import com.example.pokerscore.player.PlayerHistory
 import com.example.pokerscore.ui.theme.PokerScoreTheme
 import androidx.compose.ui.platform.LocalContext
@@ -27,15 +26,12 @@ fun HistoryScreen(
 ) {
     val context = LocalContext.current
     println("context : $context")
-    val playerRepository = PlayerRepository(context)
 
     var players = listOf(
         PlayerHistory("John Doe", 1000),
         PlayerHistory("Jane Smith", 500),
         PlayerHistory("Mike Johnson", 750)
     )
-    playerRepository.savePlayers(players)
-    players = playerRepository.getPlayers()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 16.dp),

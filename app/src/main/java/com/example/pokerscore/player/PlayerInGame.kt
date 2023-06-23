@@ -5,7 +5,7 @@ import com.example.pokerscore.hand.HandState
 
 class PlayerInGame(
     override val name: String,
-    private var chipCount: Int,
+    private var chipCount: Int = 1000,
     private var bet: Int = 0,
     private var hand: Hand? = null,
     private var haveToTalk: Boolean = true,

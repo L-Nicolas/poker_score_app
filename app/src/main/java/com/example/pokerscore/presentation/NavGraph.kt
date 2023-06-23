@@ -1,10 +1,12 @@
 package com.example.pokerscore.presentation
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
+import com.example.pokerscore.Party
 
 @Composable
 fun SetupNavGraph(
@@ -22,6 +24,9 @@ fun SetupNavGraph(
         }
         composable(Screen.History.route) {
             HistoryScreen(navController = navController)
+        }
+        composable(Screen.Board.route) {
+            BoardScreen(navController = navController)
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.pokerscore.board
 
-import com.example.pokerscore.player.StatePlayer
+import com.example.pokerscore.player.PlayerState
 
 interface ActionPlayer {
     val board: BoardPoker
@@ -18,7 +18,7 @@ interface ActionPlayer {
 class Bet(override val board: BoardPoker) : ActionPlayer {
     override fun action() {
         println("Bet")
-        board.getCurrentPlayer().haveToTalk = true
+        board.getCurrentPlayer().setHaveToTalk(true)
         board.getCurrentPlayer().bet(10)
     }
 }
@@ -26,7 +26,7 @@ class Bet(override val board: BoardPoker) : ActionPlayer {
 class Check(override val board: BoardPoker) : ActionPlayer {
     override fun action() {
         println("Check")
-        board.getCurrentPlayer().haveToTalk = false
+        board.getCurrentPlayer().setHaveToTalk(false)
     }
 }
 
@@ -45,21 +45,21 @@ class Call(override val board: BoardPoker) : ActionPlayer {
             currentPlayer.bet(amountToCall)
             amountToCall = board.getBiggestBet()
         }
-        board.getCurrentPlayer().haveToTalk = false
+        board.getCurrentPlayer().setHaveToTalk(false)
     }
 }
 
 class Fold(override val board: BoardPoker) : ActionPlayer {
     override fun action() {
-        board.getCurrentPlayer().setState(StatePlayer.FOLD)
-        board.getCurrentPlayer().haveToTalk = false
+        board.getCurrentPlayer().setState(PlayerState.FOLD)
+        board.getCurrentPlayer().setHaveToTalk(false)
     }
 }
 
 class Raise(override val board: BoardPoker) : ActionPlayer {
     override fun action() {
         println("Raise")
-        board.getCurrentPlayer().haveToTalk = true
+        board.getCurrentPlayer().setHaveToTalk(true)
         board.getCurrentPlayer().bet(20)
     }
 }
@@ -68,7 +68,26 @@ class AllIn(override val board: BoardPoker) : ActionPlayer {
     override fun action() {
         println("AllIn")
         board.getCurrentPlayer().bet(board.getCurrentPlayer().getChipCount())
-        board.getCurrentPlayer().setState(StatePlayer.ALL_IN)
-        board.getCurrentPlayer().haveToTalk = false
+        board.getCurrentPlayer().setState(PlayerState.ALL_IN)
+        board.getCurrentPlayer().setHaveToTalk(false)
+    }
+}
+
+class PlayerActionInvoker {
+    private val actions: MutableList<ActionPlayer> = mutableListOf()
+
+    fun addAction(action: ActionPlayer) {
+        actions.add(action)
+    }
+
+    fun clearActions() {
+        actions.clear()
+    }
+
+    fun executeActions() {
+        actions.forEach { command ->
+            command.execute()
+        }
+        actions.clear()
     }
 }
